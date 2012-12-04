@@ -1,0 +1,46 @@
+%{
+open Ast
+%}
+
+%start start
+
+%token <System.Int32> INT32
+%token <System.Double> FLOAT
+%token <string> STRING
+%token <bool> BOOLEAN
+%token OR
+%token AND
+%token <string> ID
+
+%token PLUS MINUS ASTER SLASH UMINUS
+%token GREATER LESS
+%token LPAREN RPAREN
+%token EOF
+
+%left OR AND
+%left PLUS MINUS ASTER SLASH
+%left GREATER LESS
+%nonassoc UNMINUS
+
+%type<Ast.Expr> start
+
+%%
+
+start: EXPR EOF { $1 }
+
+Expr:
+  | ID { Identifier($1) }
+  | INT32 { Integer($1) }
+  | FLOAT { DOUBLE($1) }
+  | BOOLEAN { Boolean($1) }
+  | STRING { String($1) }
+  | Expr OR Expr { Or($1, $3) }
+  | Expr AND Expr { And($1, $3) }
+  | LPAREN Expr RPAREN { Paren($2) }
+  | Expr PLUS Expr { Plus($1, $3) }
+  | Expr MINUS Expr { Minus($1, $3) }
+  | Expr ASTER Expr { Aster($1, $3) }
+  | Expr SLASH Expr { Slash($1, $3) }
+  | Expr GREATER Expr { Greater($1, $3) }
+  | Expr LESS Expr { Less($1, $3) }
+  | MINUS Expr %prec UMINUS { Negate($2) }
