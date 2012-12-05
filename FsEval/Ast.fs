@@ -21,7 +21,7 @@ type Value =
   | VBoolean of bool
   | VInteger of int
   | VDouble of double
-  | VString of strinf
+  | VString of string
   | VError of string
 
 type Type =

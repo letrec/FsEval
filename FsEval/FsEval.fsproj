@@ -47,30 +47,30 @@
   <!--Import Project="..\..\..\powerpack\FSharp.PowerPack.targets" Condition="!Exists('..\..\..\powerpack\FSharp.PowerPack.Build.Tasks.dll')" /-->
   <Import Project="..\..\..\powerpack\FSharp.PowerPack.targets" />
   <ItemGroup>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags>--unicode</OtherFlags>
-    </FsLex>
+    <Compile Include="Ast.fs" />
     <FsYacc Include="Parser.fsy">
       <OtherFlags>--module Parser</OtherFlags>
     </FsYacc>
-    <Compile Include="$(IntermediateOutputPath)Parser.fs">
+    <FsLex Include="Lexer.fsl">
+      <OtherFlags>--unicode</OtherFlags>
+    </FsLex>
+    <Compile Include="Parser.fs">
       <Visible>false</Visible>
       <Link>Parser.fs</Link>
     </Compile>
-    <Compile Include="$(IntermediateOutputPath)Lexer.fs">
+    <Compile Include="Lexer.fs">
       <Visible>false</Visible>
       <Link>Lexer.fs</Link>
     </Compile>
-    <Compile Include="Ast.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="FSharp.Core" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\..\powerpack\FSharp.PowerPack.dll</HintPath>
     </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
   </ItemGroup>  
 </Project>

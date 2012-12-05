@@ -58,7 +58,6 @@ let rec expr_to_type expr env =
   | Integer i -> TInteger
   | Double d -> TDouble
   | String s -> TString
-  | Error e -> TError
   | Paren x -> expr_to_type x env
   | Or (x, y) -> TBoolean
   | And (x, y) -> TBoolean
@@ -94,7 +93,7 @@ let rec eval expr (env : string -> Value) =
   | Boolean x -> VBoolean x
   | Integer x -> VInteger x
   | Double x -> VDouble x
-  | String x -> VString (s.Replace("\"", String.Empty))
+  | String x -> VString (x.Replace("\"", String.Empty))
   | Paren x -> eval x env
   | Or (x, y) ->
     match (eval x env, y) with
@@ -121,9 +120,9 @@ let rec eval expr (env : string -> Value) =
     | _ -> error y "Integer or Double" env
   | Less (x, y) ->
     match (eval x env, eval y env) with
-    | VInteger x', VInteger y' -> VInteger (x' < y')
+    | VInteger x', VInteger y' -> VBoolean (x' < y')
     | VInteger _, _ -> error y "Integer" env
-    | VDouble x', VDouble y' -> VDouble (x' < y')
+    | VDouble x', VDouble y' -> VBoolean (x' < y')
     | VDouble _, _ -> error y "Double" env
     | _ -> error y "Integer or Double" env
   | Plus (x, y) ->
@@ -135,6 +134,13 @@ let rec eval expr (env : string -> Value) =
     | VString x', VString y' -> VString (unquote_string x' + unquote_string y')
     | VString _, _ -> error y "String" env
     | _ -> error y "Integer or Double or String" env
+  | Minus (x, y) ->
+    match (eval x env, eval y env) with
+    | VInteger x', VInteger y' -> VInteger (x' - y')
+    | VInteger _, _ -> error y "Integer" env
+    | VDouble x', VDouble y' -> VDouble (x' - y')
+    | VDouble _, _ -> error y "Double" env
+    | _ -> error y "Integer or Double" env
   | Aster (x, y) ->
     match (eval x env, eval y env) with
     | VInteger x', VInteger y' -> VInteger (x' * y')
@@ -144,16 +150,16 @@ let rec eval expr (env : string -> Value) =
     | _ -> error y "Integer or Double" env
   | Slash (x, y) ->
     match (eval x env, eval y env) with
-    | VInteger x', VInteger y' -> VBoolean (x' / y')
+    | VInteger x', VInteger y' -> VInteger (x' / y')
     | VInteger _, _ -> error y "Integer" env
-    | VDouble x', VDouble y' -> VBoolean (x' / y')
+    | VDouble x', VDouble y' -> VDouble (x' / y')
     | VDouble _, _ -> error y "Double" env
     | _ -> error y "Integer or Double" env
   | Negate x ->
     match eval x env with
     | VInteger x' -> VInteger -x'
     | VDouble x' -> VDouble -x'
-    | _ -> error y "Integer or Double" env
+    | _ -> error x "Integer or Double" env
 
 let vars = Map.ofList ["x", VInteger 1; "y", VDouble 2.0; "z", VBoolean true]
 let env (x : string) : Value =
@@ -171,11 +177,11 @@ let rec repl () =
     try
       let expr = Parser.start Lexer.tokenize lexbuf
       let value = eval expr env
-      printf "%s = %s" (value |> value_to_type |> type_to_string) (value |> value_to_string)
+      printfn "%s = %s" (value |> value_to_type |> type_to_string) (value |> value_to_string)
     with ex ->
       let pos = lexbuf.EndPos
-      printf "Error at line %d, character %d: %s" pos.Line pos.Column ex.Message
+      printfn "Error at line %d, character %d: %s" pos.Line pos.Column ex.Message
 
-    repl()
+    repl ()
 
-repl()
+repl ()
