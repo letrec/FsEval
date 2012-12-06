@@ -1,0 +1,6 @@
+./FsEval/Lexer.fs
+./FsEval/Parser.fs
+./FsEval/Parser.fsi
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
