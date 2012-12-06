@@ -1,0 +1,6 @@
+/home/duke/dev/FsEval/FsEval/Lexer.fs
+/home/duke/dev/FsEval/FsEval/Parser.fs
+/home/duke/dev/FsEval/FsEval/bin/Debug/FsEval.exe.mdb
+/home/duke/dev/FsEval/FsEval/bin/Debug/FsEval.exe
+/home/duke/dev/FsEval/FsEval/obj/Debug/FsEval.exe
+/home/duke/dev/FsEval/FsEval/obj/Debug/FsEval.exe.mdb

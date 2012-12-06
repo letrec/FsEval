@@ -1,8 +1,9 @@
 {
 module Lexer
+
 open System
 open Parser
-open Microsoft.Fsharp.Text.Lexing
+open Microsoft.FSharp.Text.Lexing
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 }
@@ -11,7 +12,7 @@ let digit = ['0'-'9']
 let char = ['a'-'z' 'A'-'Z']
 let whitespace = [' ' '\t']
 let newline = ('\n' | 'r' 'n')
-let identifier = ('[' (difit|char)+ ']')
+let identifier = ('[' (digit|char)+ ']')
 let string = ('"' (digit|char)+ '"')
 
 rule tokenize = parse
@@ -34,8 +35,8 @@ rule tokenize = parse
 | ")" { RPAREN }
 
 | identifier { ID (lexeme lexbuf) }
-| digit+ { INT32 (Int32.Parse(lexeme lexbuf) }
-| digit+('.'digit+)?(['e''E']digit+)? { INT32 (Int32.Parse(lexeme lexbuf) }
+| digit+ { INT32 (Int32.Parse(lexeme lexbuf)) }
+| digit+('.'digit+)?(['e''E']digit+)? { INT32 (Int32.Parse(lexeme lexbuf)) }
 | string { STRING (lexeme lexbuf) }
 
 | eof { EOF }

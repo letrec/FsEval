@@ -26,12 +26,12 @@ open Ast
 
 %%
 
-start: EXPR EOF { $1 }
+start: Expr EOF { $1 }
 
 Expr:
   | ID { Identifier($1) }
   | INT32 { Integer($1) }
-  | FLOAT { DOUBLE($1) }
+  | FLOAT { Double($1) }
   | BOOLEAN { Boolean($1) }
   | STRING { String($1) }
   | Expr OR Expr { Or($1, $3) }
