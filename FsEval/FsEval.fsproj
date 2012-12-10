@@ -35,8 +35,8 @@
     <FsSrGenToolPath>..\..\..\powerpack</FsSrGenToolPath>
     <FsLexToolPath>..\..\..\powerpack</FsLexToolPath>
     <FsYaccToolPath>..\..\..\powerpack</FsYaccToolPath>
-    <FsLexToolExe>fslex.exe</FsLexToolExe>
-    <FsYaccToolExe>fsyacc.exe</FsYaccToolExe>
+    <FsLexToolExe>FsLex.exe</FsLexToolExe>
+    <FsYaccToolExe>FsYacc.exe</FsYaccToolExe>
   </PropertyGroup>  
   <PropertyGroup>
     <FsLexOutputFolder>$(IntermediateOutputPath)</FsLexOutputFolder>

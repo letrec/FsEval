@@ -40,4 +40,4 @@ rule tokenize = parse
 | string { STRING (lexeme lexbuf) }
 
 | eof { EOF }
-| _ { failwith "unrecognixed lexeme: '%s'" (lexeme lexbuf) }
+| _ { failwithf "unrecognized input: '%s'" (lexeme lexbuf) }

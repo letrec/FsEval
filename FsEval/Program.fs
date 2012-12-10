@@ -161,6 +161,65 @@ let rec eval expr (env : string -> Value) =
     | VDouble x' -> VDouble -x'
     | _ -> error x "Integer or Double" env
 
+type QExpr<'a> = Microsoft.FSharp.Quotations.Expr<'a>
+
+let rec to_expr (expr : Expr) : QExpr<(string -> Value) -> Value> =
+  match expr with
+  | Identifier x -> <@ fun (env : string -> Value) -> env x @>
+  | Boolean x -> <@ fun (env : string -> Value) -> VBoolean x @>
+  | Integer x -> <@ fun (env : string -> Value) -> VInteger x @>
+  | Double x -> <@ fun (env : string -> Value) -> VDouble x @>
+  | String x -> <@ fun (env : string -> Value) -> VString (x.Replace("\"", String.Empty)) @>
+  | Paren x -> <@ %(to_expr x) @>
+  | Or (x, y) ->
+    match (x, y) with
+    | Boolean true, _ -> <@ fun (env : string -> Value) -> VBoolean true @>
+    | Boolean false, y -> <@ %(to_expr y) @>
+    | _ ->
+      let x' = to_expr x
+      let y' = to_expr y
+      <@
+        fun (env : string -> Value) -> 
+        match (%x')(env) with
+        | VBoolean true -> VBoolean true
+        | VBoolean false ->
+          match (%y')(env) with
+          | VBoolean y'' -> VBoolean y''
+          | _ -> error y "Boolean" env
+        | _ -> error y "Boolean" env
+      @>
+  | And (x, y) ->
+    match (x, y) with
+    | Boolean false, _ -> <@ fun (env : string -> Value) -> VBoolean false @>
+    | Boolean true, y -> <@ %(to_expr y) @>
+    | _ ->
+      let x' = to_expr x
+      let y' = to_expr y
+      <@
+        fun (env : string -> Value) -> 
+        match (%x')(env) with
+        | VBoolean false -> VBoolean false
+        | VBoolean true ->
+          match (%y')(env) with
+          | VBoolean y'' -> VBoolean y''
+          | _ -> error y "Boolean" env
+        | _ -> error y "Boolean" env
+      @>
+  | Greater (x, y) ->
+      let x' = to_expr x
+      let y' = to_expr y
+      <@
+        fun (env : string -> Value) -> 
+        match ((%x') (env), (%y') (env)) with
+        | VInteger x'', VInteger y'' -> VBoolean (x'' > y'')
+        | VInteger x'', y'' -> error y "Integer" env
+        | VDouble x'', VDouble y'' -> VBoolean (x'' > y'')
+        | VDouble x'', y'' -> error y "Double" env
+        | _ -> error y "Integer or Double" env
+      @>
+  | _ -> <@ failwith "" @>
+
+
 let vars = Map.ofList ["x", VInteger 1; "y", VDouble 2.0; "z", VBoolean true]
 let env (x : string) : Value =
   let x' = x.Replace("[", String.Empty).Replace("]", String.Empty) //Crap
@@ -178,6 +237,10 @@ let rec repl () =
       let expr = Parser.start Lexer.tokenize lexbuf
       let value = eval expr env
       printfn "%s = %s" (value |> value_to_type |> type_to_string) (value |> value_to_string)
+
+      let qexpr = to_expr expr
+      printfn "%s" (qexpr.ToString())
+      //printfn "%s" env |> qexpr |> value_to_string
     with ex ->
       let pos = lexbuf.EndPos
       printfn "Error at line %d, character %d: %s" pos.Line pos.Column ex.Message
