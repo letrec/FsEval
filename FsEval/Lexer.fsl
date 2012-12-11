@@ -6,6 +6,8 @@ open Parser
 open Microsoft.FSharp.Text.Lexing
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+let inline unquote_string (s : string) = s.Replace("\"", String.Empty)
+let inline unquote_id (id : string) = id.Replace("[", String.Empty).Replace("]", String.Empty)
 }
 
 let digit = ['0'-'9']
@@ -34,10 +36,10 @@ rule tokenize = parse
 | "(" { LPAREN }
 | ")" { RPAREN }
 
-| identifier { ID (lexeme lexbuf) }
+| identifier { ID (lexeme lexbuf |> unquote_id) }
 | digit+ { INT32 (Int32.Parse(lexeme lexbuf)) }
 | digit+('.'digit+)?(['e''E']digit+)? { INT32 (Int32.Parse(lexeme lexbuf)) }
-| string { STRING (lexeme lexbuf) }
+| string { STRING (lexeme lexbuf |> unquote_string) }
 
 | eof { EOF }
 | _ { failwithf "unrecognized input: '%s'" (lexeme lexbuf) }

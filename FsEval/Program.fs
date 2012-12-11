@@ -6,8 +6,7 @@ open Lexer
 open Parser
 
 let inline quote_string (s : string) = "\"" + s + "\""
-
-let inline unquote_string (s : string) = s.Replace("\"", String.Empty)
+let inline quote_id (id : string) = "[" + id + "]"
 
 let value_to_string v =
   match v with
@@ -35,7 +34,7 @@ let type_to_string t =
 
 let rec expr_to_string (expr : Expr) : string =
   match expr with
-  | Identifier x -> x
+  | Identifier x -> quote_id x
   | Boolean x -> x.ToString()
   | Integer x -> x.ToString()
   | Double x -> x.ToString()
@@ -131,7 +130,7 @@ let rec eval expr (env : string -> Value) =
     | VInteger _, _ -> error y "Integer" env
     | VDouble x', VDouble y' -> VDouble (x' + y')
     | VDouble _, _ -> error y "Double" env
-    | VString x', VString y' -> VString (unquote_string x' + unquote_string y')
+    | VString x', VString y' -> VString (x' + y')
     | VString _, _ -> error y "String" env
     | _ -> error y "Integer or Double or String" env
   | Minus (x, y) ->
@@ -222,8 +221,7 @@ let rec to_expr (expr : Expr) : QExpr<(string -> Value) -> Value> =
 
 let vars = Map.ofList ["x", VInteger 1; "y", VDouble 2.0; "z", VBoolean true]
 let env (x : string) : Value =
-  let x' = x.Replace("[", String.Empty).Replace("]", String.Empty) //Crap
-  match vars.TryFind x' with
+  match vars.TryFind x with
   | None -> VError ("Unbound variable " + x)
   | Some v -> v
 
@@ -237,6 +235,7 @@ let rec repl () =
       let expr = Parser.start Lexer.tokenize lexbuf
       let value = eval expr env
       printfn "%s = %s" (value |> value_to_type |> type_to_string) (value |> value_to_string)
+      printfn "%s" (expr |> expr_to_string)
 
       let qexpr = to_expr expr
       printfn "%s" (qexpr.ToString())
