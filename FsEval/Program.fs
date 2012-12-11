@@ -38,7 +38,7 @@ let rec expr_to_string (expr : Expr) : string =
   | Boolean x -> x.ToString()
   | Integer x -> x.ToString()
   | Double x -> x.ToString()
-  | String x -> x
+  | String x -> quote_string x
   | Paren x -> "(" + expr_to_string x + ")"
   | Or (x, y) -> expr_to_string x + " || " + expr_to_string y
   | And (x, y) -> expr_to_string x + " && " + expr_to_string y
@@ -222,7 +222,7 @@ let rec to_expr (expr : Expr) : QExpr<(string -> Value) -> Value> =
 let vars = Map.ofList ["x", VInteger 1; "y", VDouble 2.0; "z", VBoolean true]
 let env (x : string) : Value =
   match vars.TryFind x with
-  | None -> VError ("Unbound variable " + x)
+  | None -> VError ("Unbound variable " + quote_id x)
   | Some v -> v
 
 let rec repl () =
